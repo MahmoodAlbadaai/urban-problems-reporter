@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Success Stories | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/success.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="success-stories">
+    <h2>Success Stories</h2>
+    <p>Here are some urban issues that have been successfully resolved thanks to community efforts.</p>
+
+    {% if resolutions %}
+        {% for resolution in resolutions %}
+        <div class="story">
+            <h3>{{ resolution.issue.title }}</h3>
+            <div class="story-images">
+                {% if resolution.before_image %}
+                    <img src="{{ resolution.before_image.url }}" alt="Before: {{ resolution.issue.title }}">
+                {% elif resolution.issue.image %}
+                    <img src="{{ resolution.issue.image.url }}" alt="Before: {{ resolution.issue.title }}">
+                {% else %}
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="No before image">
+                {% endif %}
+                
+                {% if resolution.after_image %}
+                    <img src="{{ resolution.after_image.url }}" alt="After: {{ resolution.issue.title }}">
+                {% else %}
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="No after image">
+                {% endif %}
+            </div>
+            <p><strong>Reported:</strong> {{ resolution.issue.reported_date|date:"F j, Y" }}</p>
+            <p><strong>Resolved:</strong> {{ resolution.resolution_date|date:"F j, Y" }}</p>
+            <p>{{ resolution.resolution_details }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-stories">
+            <p>No success stories yet. Check back soon!</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

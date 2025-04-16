@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Authority Dashboard | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    .status-count {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #333;
+    }
+    
+    .recent-issues {
+        margin-top: 30px;
+        text-align: left;
+    }
+    
+    .issue-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .issue-item {
+        background: #f8f9fa;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .issue-title {
+        font-weight: bold;
+    }
+    
+    .issue-date {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .view-btn {
+        background: #0077cc;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block header_title %}Authority Dashboard{% endblock %}
+
+{% block content %}
+<!-- Dashboard Section -->
+<section class="dashboard">
+    <h2>Welcome, Authority Member</h2>
+    <p>Here you can manage reported urban issues.</p>
+
+    <!-- Dashboard Boxes: Quick access to different functionalities -->
+    <div class="dashboard-sections">
+        
+        <!-- Box for Viewing New Cases -->
+        <div class="dashboard-box">
+            <h3>Pending Issues</h3>
+            <div class="status-count">{{ pending_count }}</div>
+            <p>View reports awaiting action.</p>
+            <a href="{% url 'map' %}?status=pending" class="dashboard-btn">View Cases</a>
+        </div>
+
+        <!-- Box for In-Progress Cases -->
+        <div class="dashboard-box">
+            <h3>In Progress</h3>
+            <div class="status-count">{{ in_progress_count }}</div>
+            <p>View issues being addressed.</p>
+            <a href="{% url 'map' %}?status=in_progress" class="dashboard-btn">View Cases</a>
+        </div>
+
+        <!-- Box for Resolved Cases -->
+        <div class="dashboard-box">
+            <h3>Resolved Issues</h3>
+            <div class="status-count">{{ resolved_count }}</div>
+            <p>Check completed reports.</p>
+            <a href="{% url 'map' %}?status=resolved" class="dashboard-btn">View History</a>
+        </div>
+    </div>
+    
+    <!-- Recent Issues Section -->
+    <div class="recent-issues">
+        <h3>Recent Issues</h3>
+        <ul class="issue-list">
+            {% for issue in recent_issues %}
+            <li class="issue-item">
+                <div class="issue-info">
+                    <div class="issue-title">{{ issue.title }}</div>
+                    <div class="issue-date">Reported: {{ issue.reported_date|date:"F j, Y" }}</div>
+                </div>
+                <a href="{% url 'issue_detail' issue.pk %}" class="view-btn">View Details</a>
+            </li>
+            {% empty %}
+            <li>No recent issues found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}

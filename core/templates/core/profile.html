@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}My Profile | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<style>
+    .profile-container {
+        text-align: left;
+    }
+    
+    .profile-header {
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <section class="login-container profile-container">
+        <div class="profile-header">
+            <h2>My Profile</h2>
+            <p>Update your personal information</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Profile Form -->
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Username -->
+            <div class="form-group">
+                <label for="{{ user_form.username.id_for_label }}">Username</label>
+                {{ user_form.username }}
+                {% if user_form.username.errors %}
+                    <small class="error-message" style="display: block;">{{ user_form.username.errors.0 }}</small>
+                {% endif %}
+            </div>
+            
+            <!-- Email -->
+            <div class="form-group">
+                <label for="{{ user_form.email.id_for_label }}">Email</label>
+                {{ user_form.email }}
+                {% if user_form.email.errors %}
+                    <small class="error-message" style="display: block;">{{ user_form.email.errors.0 }}</small>
+                {% endif %}
+            </div>
+            
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label for="{{ profile_form.phone_number.id_for_label }}">Phone Number</label>
+                {{ profile_form.phone_number }}
+                {% if profile_form.phone_number.errors %}
+                    <small class="error-message" style="display: block;">{{ profile_form.phone_number.errors.0 }}</small>
+                {% endif %}
+            </div>
+            
+            <!-- Address -->
+            <div class="form-group">
+                <label for="{{ profile_form.address.id_for_label }}">Address</label>
+                {{ profile_form.address }}
+                {% if profile_form.address.errors %}
+                    <small class="error-message" style="display: block;">{{ profile_form.address.errors.0 }}</small>
+                {% endif %}
+            </div>
+            
+            {% if user.is_staff or user.profile.is_authority %}
+            <div class="authority-status">
+                <p><strong>Account Type:</strong> Authority User</p>
+            </div>
+            {% endif %}
+            
+            <!-- Submit Button -->
+            <button type="submit" class="login-btn">Update Profile</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

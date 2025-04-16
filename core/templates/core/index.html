@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Crowdsourced Urban Problems Reporter{% endblock %}
+
+{% block content %}
+    <!-- Intro Section: Brief introduction about the platform -->
+    <section class="intro">
+        <h2>Welcome to the Urban Problems Reporter</h2>
+        <p>Help improve your city by reporting issues like potholes, broken streetlights, and pollution.</p>
+        <a href="{% url 'report' %}" class="button">Report an Issue</a> <!-- Call-to-action button -->
+    </section>
+
+    <!-- How It Works Section: Explains the step-by-step process of reporting issues -->
+    <section class="how-it-works">
+        <h2>How It Works</h2>
+        <p>Follow these three simple steps to report an issue and help your city improve:</p>
+        
+        <!-- Steps Container -->
+        <div class="steps">
+            <!-- Step 1: Report an issue -->
+            <div class="step">
+                <img src="{% static 'images/report-icon.jpg' %}" alt="Report Icon"> <!-- Report step icon -->
+                <h3>Step 1: Report</h3>
+                <p>Provide details about the issue, including its type, location, and a brief description.</p>
+            </div>
+
+            <!-- Step 2: Review the issue -->
+            <div class="step">
+                <img src="{% static 'images/review-icon.png' %}" alt="Review Icon"> <!-- Review step icon -->
+                <h3>Step 2: Review</h3>
+                <p>Our team reviews the issue and forwards it to the relevant authorities.</p>
+            </div>
+
+            <!-- Step 3: Resolve the issue -->
+            <div class="step">
+                <img src="{% static 'images/resolved-icon.jpg' %}" alt="Resolve Icon"> <!-- Resolve step icon -->
+                <h3>Step 3: Resolve</h3>
+                <p>The authorities take action, and the issue is resolved. You can track the progress on our platform.</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}

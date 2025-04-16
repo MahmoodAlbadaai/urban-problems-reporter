@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <!-- Meta tag for responsive design, ensuring the page adapts to mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Title of the webpage (appears on the browser tab) -->
+    <title>{% block title %}Crowdsourced Urban Problems Reporter{% endblock %}</title>
+
+    <!-- Logo Container: Ensures the logo is displayed in the top-right corner -->
+    <div class="logo-container">
+        <img src="{% static 'images/urban-logo.png' %}" alt="Urban Logo" class="logo">
+    </div>
+
+    <!-- Linking the main stylesheet for general website styles -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- Additional CSS block for page-specific stylesheets -->
+    {% block additional_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Header Section: Contains the site title and navigation menu -->
+    <header>
+        <div class="header-container">
+            <!-- Logo Section -->
+            <div class="logo-container">
+                <img src="{% static 'images/urban-logo.png' %}" alt="Urban Logo" class="logo">
+            </div>
+
+            <!-- Website Title -->
+            <h1 class="site-title">{% block header_title %}Crowdsourced Urban Problems Reporter{% endblock %}</h1>
+
+            <!-- Menu Toggle Button -->
+            <button id="menu-toggle" class="menu-button">☰ Menu</button>
+        </div>
+
+        <!-- Slide-In Navigation Menu (Right Side) -->
+        <nav id="nav-menu">
+            <button id="close-menu" class="close-button">✖ Close</button>
+            <ul>
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li><a href="{% url 'report' %}">Report an Issue</a></li>
+                <li><a href="{% url 'map' %}">Reported Issues</a></li>
+                <li><a href="{% url 'success' %}">Success Stories</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+
+
+         {% if user.is_authenticated %}
+            {% if user.is_staff or user.profile.is_authority %}
+            <li><a href="{% url 'authority_dashboard' %}">Authority Dashboard</a></li>
+            {% endif %}
+            <li><a href="{% url 'profile' %}">My Profile</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register</a></li>
+        {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main>
+        {% block content %}
+        <!-- Page-specific content goes here -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer Section: Contains copyright information -->
+    <footer>
+        <p>&copy; 2025 Urban Reporter | All rights reserved.</p>
+    </footer>
+
+    <!-- Common JavaScript Files -->
+    <script src="{% static 'js/menu.js' %}"></script>
+    
+    <!-- Additional JavaScript block for page-specific scripts -->
+    {% block additional_js %}{% endblock %}
+
+</body>
+</html>

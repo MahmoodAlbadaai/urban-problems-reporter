@@ -1,0 +1,270 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ issue.title }} | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/issue-detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="issue-detail">
+    <div class="issue-header">
+        <h2>{{ issue.title }}</h2>
+        <span class="issue-status {{ issue.status }}">{{ issue.get_status_display }}</span>
+    </div>
+    
+    <div class="issue-meta">
+        <p><strong>Issue Type:</strong> {{ issue.issue_type.name }}</p>
+        <p><strong>Location:</strong> {{ issue.location.name }}</p>
+        <p><strong>Address:</strong> {{ issue.location.address }}</p>
+        <p><strong>Reported On:</strong> {{ issue.reported_date|date:"F j, Y, g:i a" }}</p>
+        <p><strong>Incident Date:</strong> {{ issue.incident_date|date:"F j, Y" }}</p>
+        <p><strong>Reported By:</strong> {{ issue.reporter_name }}</p>
+    </div>
+    
+    <div class="issue-description">
+        <h3>Description</h3>
+        <p>{{ issue.description }}</p>
+    </div>
+    
+    {% if issue.image %}
+    <div class="issue-image">
+        <h3>Issue Image</h3>
+        <img src="{{ issue.image.url }}" alt="Image of {{ issue.title }}">
+    </div>
+    {% endif %}
+    
+    {% if resolution %}
+    <div class="issue-resolution">
+        <h3>Resolution</h3>
+        <p class="resolution-date"><strong>Resolved On:</strong> {{ resolution.resolution_date|date:"F j, Y, g:i a" }}</p>
+        <p>{{ resolution.resolution_details }}</p>
+        
+        {% if resolution.before_image and resolution.after_image %}
+        <div class="before-after-images">
+            <div class="before-image">
+                <h4>Before</h4>
+                <img src="{{ resolution.before_image.url }}" alt="Before image">
+            </div>
+            <div class="after-image">
+                <h4>After</h4>
+                <img src="{{ resolution.after_image.url }}" alt="After image">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if user.is_authenticated %}
+    <div class="admin-actions">
+        <h3>Authority Actions</h3>
+        <div class="action-buttons">
+            <a href="{% url 'issue_update' issue.pk %}" class="action-btn update-btn">Update Issue</a>
+            
+            {% if not resolution %}
+            <a href="{% url 'add_resolution' issue.pk %}" class="action-btn resolve-btn">Mark as Resolved</a>
+            {% else %}
+            <a href="{% url 'update_resolution' issue.pk %}" class="action-btn update-btn">Update Resolution</a>
+            {% endif %}
+            
+            <a href="{% url 'issue_delete' issue.pk %}" class="action-btn delete-btn">Delete Issue</a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="issue-comments">
+        <h3>Comments ({{ comments|length }})</h3>
+        
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <strong>
+                        {% if comment.user %}
+                        {{ comment.user.username }} (Authority)
+                        {% else %}
+                        {{ comment.author_name }}
+                        {% endif %}
+                    </strong>
+                    <span class="comment-date">{{ comment.created_at|date:"F j, Y, g:i a" }}</span>
+                </div>
+                <div class="comment-body">
+                    <p>{{ comment.comment_text }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="no-comments">No comments yet. Be the first to comment!</p>
+            {% endfor %}
+        </div>
+        
+        <div class="add-comment">
+            <h4>Add a Comment</h4>
+            <form id="comment-form" method="POST">
+                {% csrf_token %}
+                
+                {% if not user.is_authenticated %}
+                <div class="form-group">
+                    <label for="{{ comment_form.author_name.id_for_label }}">Your Name:</label>
+                    {{ comment_form.author_name }}
+                    {% if comment_form.author_name.errors %}
+                    <small class="error-message">{{ comment_form.author_name.errors.0 }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ comment_form.author_email.id_for_label }}">Your Email:</label>
+                    {{ comment_form.author_email }}
+                    {% if comment_form.author_email.errors %}
+                    <small class="error-message">{{ comment_form.author_email.errors.0 }}</small>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="{{ comment_form.comment_text.id_for_label }}">Your Comment:</label>
+                    {{ comment_form.comment_text }}
+                    {% if comment_form.comment_text.errors %}
+                    <small class="error-message">{{ comment_form.comment_text.errors.0 }}</small>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="submit-btn">Post Comment</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Success message if comment was submitted successfully -->
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block additional_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Comment form validation
+    const commentForm = document.getElementById('comment-form');
+    
+    commentForm.addEventListener('submit', function(event) {
+        const commentTextarea = document.getElementById('{{ comment_form.comment_text.id_for_label }}');
+        
+        if (commentTextarea.value.trim().length < 10) {
+            event.preventDefault();
+            
+            // Find or create error message
+            let errorElement = commentTextarea.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('error-message')) {
+                errorElement = document.createElement('small');
+                errorElement.className = 'error-message';
+                commentTextarea.parentNode.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = 'Comment must be at least 10 characters long.';
+            errorElement.style.display = 'block';
+        }
+        
+        {% if not user.is_authenticated %}
+        // Validate name and email for non-authenticated users
+        const nameInput = document.getElementById('{{ comment_form.author_name.id_for_label }}');
+        const emailInput = document.getElementById('{{ comment_form.author_email.id_for_label }}');
+        
+        if (nameInput.value.trim().length < 2) {
+            event.preventDefault();
+            
+            let errorElement = nameInput.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('error-message')) {
+                errorElement = document.createElement('small');
+                errorElement.className = 'error-message';
+                nameInput.parentNode.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = 'Name must be at least 2 characters long.';
+            errorElement.style.display = 'block';
+        }
+        
+        if (emailInput.value.trim() === '' || !emailInput.value.includes('@')) {
+            event.preventDefault();
+            
+            let errorElement = emailInput.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('error-message')) {
+                errorElement = document.createElement('small');
+                errorElement.className = 'error-message';
+                emailInput.parentNode.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = 'Please enter a valid email address.';
+            errorElement.style.display = 'block';
+        }
+        {% endif %}
+    });
+    
+    // AJAX comment submission alternative (could be used instead of the form POST)
+    /*
+    commentForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const commentTextarea = document.getElementById('{{ comment_form.comment_text.id_for_label }}');
+        
+        if (commentTextarea.value.trim().length < 10) {
+            // Display error message
+            return;
+        }
+        
+        const formData = new FormData(commentForm);
+        
+        fetch('{% url "ajax_add_comment" issue.pk %}', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add the new comment to the list without refreshing
+                const commentsList = document.querySelector('.comments-list');
+                const noComments = document.querySelector('.no-comments');
+                
+                if (noComments) {
+                    noComments.remove();
+                }
+                
+                const newComment = document.createElement('div');
+                newComment.className = 'comment';
+                newComment.innerHTML = `
+                    <div class="comment-header">
+                        <strong>${data.author}</strong>
+                        <span class="comment-date">${data.date}</span>
+                    </div>
+                    <div class="comment-body">
+                        <p>${data.text}</p>
+                    </div>
+                `;
+                
+                commentsList.prepend(newComment);
+                
+                // Reset the form
+                commentForm.reset();
+            } else {
+                // Display errors
+                for (const field in data.errors) {
+                    const error = JSON.parse(data.errors)[field];
+                    // Display error for each field
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    */
+});
+</script>
+{% endblock %}

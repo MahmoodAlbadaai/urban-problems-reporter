@@ -1,0 +1,67 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Report Submitted | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<style>
+    .confirmation-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .confirmation-icon {
+        color: #28a745;
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+    
+    .confirmation-heading {
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+    
+    .confirmation-message {
+        margin-bottom: 30px;
+        font-size: 18px;
+    }
+    
+    .home-link, .issues-link {
+        display: inline-block;
+        margin: 10px;
+        padding: 10px 20px;
+        background-color: #0077cc;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    
+    .home-link:hover, .issues-link:hover {
+        background-color: #005fa3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmation-container">
+    <div class="confirmation-icon">✓</div>
+    <h2 class="confirmation-heading">Report Submitted Successfully!</h2>
+    
+    <p class="confirmation-message">
+        Thank you for reporting this issue. Your contribution helps make our city better.
+        City authorities have been notified and will address the issue as soon as possible.
+    </p>
+    
+    <p>You can track the status of your report on the "Reported Issues" page.</p>
+    
+    <div class="confirmation-links">
+        <a href="{% url 'index' %}" class="home-link">Return to Home</a>
+        <a href="{% url 'map' %}" class="issues-link">View All Issues</a>
+    </div>
+</div>
+{% endblock %}

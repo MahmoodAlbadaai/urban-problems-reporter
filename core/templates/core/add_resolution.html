@@ -1,0 +1,169 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Resolve Issue | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="form-container">
+    <h2>Resolve Issue</h2>
+    <p>You are marking the following issue as resolved: <strong>{{ issue.title }}</strong></p>
+
+    <!-- Add Resolution Form -->
+    <form id="resolutionForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Django form errors -->
+        {% if form.non_field_errors %}
+        <div class="error-message form-error">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Resolution Details Field -->
+        <div class="form-group">
+            <label for="{{ form.resolution_details.id_for_label }}">Resolution Details:</label>
+            {{ form.resolution_details }}
+            {% if form.resolution_details.errors %}
+            <small class="error-message">{{ form.resolution_details.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Before Image Field -->
+        <div class="form-group">
+            <label for="{{ form.before_image.id_for_label }}">Before Image (Optional):</label>
+            {{ form.before_image }}
+            <small class="hint">If no image is uploaded, the original issue image will be used as the "before" image if available.</small>
+            {% if form.before_image.errors %}
+            <small class="error-message">{{ form.before_image.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- After Image Field -->
+        <div class="form-group">
+            <label for="{{ form.after_image.id_for_label }}">After Image (Recommended):</label>
+            {{ form.after_image }}
+            {% if form.after_image.errors %}
+            <small class="error-message">{{ form.after_image.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Featured Checkbox -->
+        <div class="form-group checkbox-group">
+            <label for="{{ form.featured.id_for_label }}">
+                {{ form.featured }}
+                Feature this as a success story on the homepage
+            </label>
+            {% if form.featured.errors %}
+            <small class="error-message">{{ form.featured.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn">Mark as Resolved</button>
+        <a href="{% url 'issue_detail' issue.pk %}" class="cancel-btn">Cancel</a>
+    </form>
+    
+    <!-- Success message if form was submitted successfully -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Resolution form validation
+    const form = document.getElementById('resolutionForm');
+    const detailsTextarea = document.getElementById('{{ form.resolution_details.id_for_label }}');
+    const afterImageInput = document.getElementById('{{ form.after_image.id_for_label }}');
+    
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Validate resolution details
+        if (detailsTextarea.value.trim().length < 20) {
+            let errorElement = detailsTextarea.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('error-message')) {
+                errorElement = document.createElement('small');
+                errorElement.className = 'error-message';
+                detailsTextarea.parentNode.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = 'Please provide detailed information about how this issue was resolved (at least 20 characters).';
+            errorElement.style.display = 'block';
+            isValid = false;
+        }
+        
+        // Encourage (but don't require) after image
+        if (afterImageInput.files.length === 0) {
+            if (confirm('You haven\'t uploaded an "after" image. This helps demonstrate that the issue was resolved. Continue without an image?')) {
+                // User confirmed, continue with submission
+            } else {
+                // User cancelled, stop submission
+                event.preventDefault();
+                return;
+            }
+        }
+        
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+    
+    // Image preview
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                if (!preview) {
+                    // Create preview element if it doesn't exist
+                    const newPreview = document.createElement('img');
+                    newPreview.id = previewId;
+                    newPreview.className = 'image-preview';
+                    newPreview.src = e.target.result;
+                    input.parentNode.appendChild(newPreview);
+                } else {
+                    preview.src = e.target.result;
+                }
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    const beforeImageInput = document.getElementById('{{ form.before_image.id_for_label }}');
+    if (beforeImageInput) {
+        beforeImageInput.addEventListener('change', function() {
+            previewImage(this, 'before-preview');
+        });
+    }
+    
+    if (afterImageInput) {
+        afterImageInput.addEventListener('change', function() {
+            previewImage(this, 'after-preview');
+        });
+    }
+});
+</script>
+{% endblock %}

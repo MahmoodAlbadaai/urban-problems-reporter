@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Update Issue | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="form-container">
+    <h2>Update Issue Status</h2>
+    <p>You are updating the status for: <strong>{{ issue.title }}</strong></p>
+
+    <!-- Update Issue Form -->
+    <form id="updateIssueForm" method="POST">
+        {% csrf_token %}
+        
+        <!-- Django form errors -->
+        {% if form.non_field_errors %}
+        <div class="error-message form-error">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Status Field -->
+        <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">Status:</label>
+            {{ form.status }}
+            {% if form.status.errors %}
+            <small class="error-message">{{ form.status.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Description Field -->
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Additional Details/Notes:</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <small class="error-message">{{ form.description.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn">Update Issue</button>
+        <a href="{% url 'issue_detail' issue.pk %}" class="cancel-btn">Cancel</a>
+    </form>
+    
+    <!-- Success message if form was submitted successfully -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update form validation
+    const form = document.getElementById('updateIssueForm');
+    const descriptionInput = document.getElementById('{{ form.description.id_for_label }}');
+    
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Validate description
+        if (descriptionInput.value.trim().length < 10) {
+            let errorElement = descriptionInput.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('error-message')) {
+                errorElement = document.createElement('small');
+                errorElement.className = 'error-message';
+                descriptionInput.parentNode.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = 'Please provide more details about the update (at least 10 characters).';
+            errorElement.style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+    
+    // Confirmation when changing status to "resolved"
+    const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+    
+    statusSelect.addEventListener('change', function() {
+        if (this.value === 'resolved') {
+            const confirmed = confirm('Are you sure you want to mark this issue as resolved? This will affect statistics and reporting.');
+            
+            if (!confirmed) {
+                // Reset to previous value
+                this.value = this.dataset.previousValue || '';
+            }
+        }
+        
+        // Store current value to compare later
+        this.dataset.previousValue = this.value;
+    });
+});
+</script>
+{% endblock %}

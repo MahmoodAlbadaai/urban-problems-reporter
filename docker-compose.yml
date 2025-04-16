@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  # MySQL Database Service
+  db:
+    # Use the official MySQL 8.0 image from Docker Hub
+    image: mysql:8.0
+
+    # Assign a name to the container for convenience
+    container_name: mydb
+
+    # Environment variables to initialize the MySQL server
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword   # Root user password
+      - MYSQL_DATABASE=myappdb             # Database to create on startup
+      - MYSQL_USER=myappdbuser             # Non-root user
+      - MYSQL_PASSWORD=myappdbpass         # Non-root user password
+
+    # Map the container's port 3306 (MySQL default) to port 3306 on the host
+    ports:
+      - "3306:3306"
+
+    # Mount volumes for data persistence and media storage
+    volumes:
+      - myapp-storage:/var/lib/mysql   # Stores the MySQL data files
+      - myapp-media:/app/media         # Mounts the same media volume used by the web service
+
+    # Healthcheck ensures Docker waits until MySQL is truly ready
+    healthcheck:
+      # Checks MySQL availability by running "mysqladmin ping"
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # How often to run the test (every 10 seconds), how long to wait, etc.
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Django Web Service
+  web:
+    # Build the Docker image for the web app from the Dockerfile in this directory
+    build: .
+
+    # Container name for the web service
+    container_name: myweb
+
+    # Indicate that this service depends on the db service and waits for a healthy state
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # On container startup, run "migrate" then start the dev server on 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+    # Environment variable telling Django where to connect for MySQL
+    environment:
+      - DATABASE_URL=mysql://myappdbuser:myappdbpass@db:3306/myappdb
+
+    # Map container port 8000 to host port 8000 for Django
+    ports:
+      - "8000:8000"
+
+# Declare volumes used by both services
+volumes:
+  myapp-storage:   # Persists MySQL data
+  myapp-media:     # Persists uploaded files (media) used by the Django app

@@ -1,0 +1,38 @@
+/* Reported Issues Section */
+.reported-issues {
+    max-width: 800px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #0077cc;
+    color: white;
+}
+
+/* Status Labels */
+.pending {
+    color: red;
+    font-weight: bold;
+}
+
+.resolved {
+    color: green;
+    font-weight: bold;
+}

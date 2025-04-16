@@ -1,0 +1,175 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Report an Issue | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="form-container">
+    <h2>Report an Urban Issue</h2>
+    <p>Please fill in the details below to report an issue in your city.</p>
+
+    <!-- Report Issue Form -->
+    <form id="issueForm" method="POST" enctype="multipart/form-data" action="{% url 'report' %}">
+        {% csrf_token %}
+        
+        <!-- Django form errors -->
+        {% if form.non_field_errors %}
+        <div class="error-message form-error">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Issue Type Field -->
+        <div class="form-group">
+            <label for="{{ form.issue_type.id_for_label }}">Issue Type:</label>
+            {{ form.issue_type }}
+            {% if form.issue_type.errors %}
+            <small class="error-message">{{ form.issue_type.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="issue-type-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Location Field -->
+        <div class="form-group">
+            <label for="{{ form.location.id_for_label }}">Location:</label>
+            {{ form.location }}
+            <button type="button" id="add-location-btn" class="btn-secondary">+ Add New Location</button>
+            {% if form.location.errors %}
+            <small class="error-message">{{ form.location.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="location-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Title Field -->
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">Issue Title:</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <small class="error-message">{{ form.title.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="title-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Description Field -->
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Description:</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <small class="error-message">{{ form.description.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="description-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Reporter Name Field -->
+        <div class="form-group">
+            <label for="{{ form.reporter_name.id_for_label }}">Your Name:</label>
+            {{ form.reporter_name }}
+            {% if form.reporter_name.errors %}
+            <small class="error-message">{{ form.reporter_name.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="reporter-name-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Reporter Email Field -->
+        <div class="form-group">
+            <label for="{{ form.reporter_email.id_for_label }}">Your Email:</label>
+            {{ form.reporter_email }}
+            {% if form.reporter_email.errors %}
+            <small class="error-message">{{ form.reporter_email.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="reporter-email-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Reporter Phone Field -->
+        <div class="form-group">
+            <label for="{{ form.reporter_phone.id_for_label }}">Phone Number:</label>
+            {{ form.reporter_phone }}
+            {% if form.reporter_phone.errors %}
+            <small class="error-message">{{ form.reporter_phone.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="reporter-phone-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Incident Date Field -->
+        <div class="form-group">
+            <label for="{{ form.incident_date.id_for_label }}">Date of Incident:</label>
+            {{ form.incident_date }}
+            {% if form.incident_date.errors %}
+            <small class="error-message">{{ form.incident_date.errors.0 }}</small>
+            {% endif %}
+            <!-- Client-side validation error message -->
+            <small class="error-message" id="incident-date-error" style="display: none;"></small>
+        </div>
+        
+        <!-- Image Upload Field -->
+        <div class="form-group">
+            <label for="{{ form.image.id_for_label }}">Upload an Image (Optional):</label>
+            {{ form.image }}
+            {% if form.image.errors %}
+            <small class="error-message">{{ form.image.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn">Submit Report</button>
+    </form>
+    
+    <!-- Success message if form was submitted successfully -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Add Location Modal -->
+    <div id="location-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Add New Location</h3>
+            <form id="location-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="location-name">Location Name:</label>
+                    <input type="text" id="location-name" placeholder="E.g., City Park" required>
+                </div>
+                <div class="form-group">
+                    <label for="location-address">Address:</label>
+                    <textarea id="location-address" rows="2" placeholder="Full address" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="location-latitude">Latitude (Optional):</label>
+                    <input type="number" id="location-latitude" step="0.000001" placeholder="E.g., 37.7749">
+                </div>
+                <div class="form-group">
+                    <label for="location-longitude">Longitude (Optional):</label>
+                    <input type="number" id="location-longitude" step="0.000001" placeholder="E.g., -122.4194">
+                </div>
+                <div id="location-errors" class="form-error" style="display: none;"></div>
+                <button type="submit" class="submit-btn">Add Location</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block additional_js %}
+<!-- Link to the external JavaScript file -->
+<script src="{% static 'js/report-form.js' %}"></script>
+{% endblock %}

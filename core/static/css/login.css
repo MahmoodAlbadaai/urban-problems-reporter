@@ -1,0 +1,56 @@
+
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Arial', sans-serif;
+    }
+
+
+    .login-container {
+        width: 40%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+    }
+    .login-box {
+        width: 350px;
+        padding: 40px;
+        text-align: center;
+    }
+    .login-box h2 {
+        margin-bottom: 30px;
+        color: #333;
+    }
+    .textbox {
+        margin-bottom: 20px;
+    }
+    .textbox input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    .btn {
+        width: 100%;
+        padding: 12px;
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    .guest-option, .forgot-password {
+        margin-top: 15px;
+    }
+    .guest-option a, .forgot-password a {
+        color: #4285f4;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .guest-option a:hover, .forgot-password a:hover {
+        text-decoration: underline;
+    }

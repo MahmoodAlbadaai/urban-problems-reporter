@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Reported Issues | Urban Reporter{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{% static 'css/map.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Reported Issues Table Section -->
+<section class="reported-issues">
+    <h2>Reported Issues</h2>
+    <p>Below is a list of urban issues reported by citizens. (This is a static preview for now.)</p>
+
+    <!-- Table for Displaying Reported Issues -->
+    <table>
+        <!-- Table Headings -->
+        <thead>
+            <tr>
+                <th>Issue Type</th> <!-- Type of issue (e.g., Pothole, Pollution) -->
+                <th>Location</th> <!-- Location of the reported issue -->
+                <th>Description</th> <!-- Description of the problem -->
+                <th>Status</th> <!-- Current status of the issue -->
+            </tr>
+        </thead>
+
+        <!-- Table Body Containing Sample Issues -->
+        <tbody>
+            <!-- Row 1: Pothole Issue -->
+            <tr>
+                <td>Pothole</td>
+                <td>Main Street, Block 5</td>
+                <td>Large pothole causing traffic congestion.</td>
+                <td class="pending">Pending</td> <!-- Status is "Pending" -->
+            </tr>
+
+            <!-- Row 2: Broken Streetlight Issue -->
+            <tr>
+                <td>Broken Streetlight</td>
+                <td>Near City Park</td>
+                <td>Streetlight not working for 2 weeks.</td>
+                <td class="resolved">Resolved</td> <!-- Status is "Resolved" -->
+            </tr>
+
+            <!-- Row 3: Pollution Issue -->
+            <tr>
+                <td>Pollution</td>
+                <td>Riverbank Avenue</td>
+                <td>Excessive garbage dumped near the river.</td>
+                <td class="pending">Pending</td> <!-- Status is "Pending" -->
+            </tr>
+        </tbody>
+    </table>
+</section>
+{% endblock %}
